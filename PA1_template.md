@@ -1,9 +1,4 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 This is a Markdown document for the processing of data for Peer Assessment 1 in the Reproducible Data course.
 
@@ -11,7 +6,8 @@ This is a Markdown document for the processing of data for Peer Assessment 1 in 
 
 Load the dataset.
 
-```{r}
+
+```r
 unzip("activity.zip")
 data <- read.csv("activity.csv")
 ```
@@ -20,53 +16,81 @@ data <- read.csv("activity.csv")
 
 Create a new dataset `data.Date` that calculates the total number of steps taken per day. Rename the column names.
 
-```{r}
+
+```r
 data.Date <- aggregate(data$steps, list(data$date), sum)
 names(data.Date) <- c("Date", "Steps")
 ```
 
 Create a histogram from the `data.Date` dataset.
 
-```{r}
+
+```r
 barplot(data.Date$Steps, names.arg = data.Date$Date, xlab= "Date", ylab = "Steps", main = "Total Steps per Day")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png) 
+
 Calculate and report the mean and median of the total number of steps taken per day.
 
-```{r}
+
+```r
 mean(data.Date$Steps, na.rm=TRUE)
 ```
 
-```{r}
+```
+## [1] 10766.19
+```
+
+
+```r
 median(data.Date$Steps, na.rm=TRUE)
+```
+
+```
+## [1] 10765
 ```
 
 ## What is the average daily activity pattern?
 
 Create a new dataset `data.Interval` that calculates the average number of steps taken across all days based on the time interval.
 
-```{r}
+
+```r
 data.Interval <- aggregate(steps ~ interval, data = data, FUN = mean)
 ```
 
 Plot a time series plot using the `data.Interval` dataset.
 
-```{r}
+
+```r
 plot(data.Interval, type = "l", main = "Average Steps per Day")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-7-1.png) 
+
 Determine which interval has the maximum number of steps.
 
-```{r}
+
+```r
 data.Interval$interval[which.max(data.Interval$steps)]
+```
+
+```
+## [1] 835
 ```
 
 ## Imputing missing values
 
 Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with `NAs`).
 
-```{r}
+
+```r
 sum(is.na(data$steps))
+```
+
+```
+## [1] 2304
 ```
 
 Create a new complete dataset based on the following rules:
@@ -77,7 +101,8 @@ Create a new complete dataset based on the following rules:
 
 * Create a new dataset `data.clean` with the average steps column removed
 
-```{r}
+
+```r
 data.complete <- merge(data, data.Interval, by = "interval", suffixes = c("", ".Avg"))
 na.Steps <- is.na(data.complete$steps)
 data.complete$steps[na.Steps] <- data.complete$steps.Avg[na.Steps]
@@ -86,22 +111,38 @@ data.clean <- data.complete[,1:3]
 
 Create a new dataset `data.cleanTotal` that calculates the total number of steps taken per day using the `data.clean` dataset. Rename the column names.
 
-```{r}
+
+```r
 data.cleanTotal <- aggregate(data.clean$steps, list(data.clean$date), sum)
 names(data.cleanTotal) <- c("Date", "Steps")
 ```
 
 Create a histogram from the `data.cleanTotal` dataset.
 
-```{r}
+
+```r
 barplot(data.cleanTotal$Steps, names.arg = data.cleanTotal$Date, xlab= "Date", ylab = "Steps", main = "Total Steps per Day - Clean")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-12-1.png) 
+
 Calculate and report the mean and median total number of steps taken per day.
 
-```{r}
+
+```r
 mean(data.cleanTotal$Steps)
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 median(data.cleanTotal$Steps)
+```
+
+```
+## [1] 10766.19
 ```
 
 **Note:**
@@ -112,7 +153,8 @@ There's no difference in mean value since we've used average values to fill the 
 
 Create a new factor variable in the dataset with two levels – “weekday” and “weekend” indicating whether a given date is a weekday or weekend day. Add this value to the `data.clean` dataset as the variable `isWeekend`.
 
-```{r}
+
+```r
 isWeekend <- function(date) {
         if (weekdays(as.Date(date)) %in% c("Saturday", "Sunday")) {
                 "weekend"
@@ -125,13 +167,16 @@ data.clean$isWeekend <- as.factor(sapply(data.clean$date, isWeekend))
 
 Make a panel plot containing a time series plot (i.e. type = "l") of the interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis).
 
-```{r}
+
+```r
 par(mfrow = c(2, 1))
 for (type in c("weekend", "weekday")) {
     data.isWeekend <- aggregate(steps ~ interval, data = data.clean, subset = data.clean$isWeekend == type, FUN = mean)
     plot(data.isWeekend, type = "l", main = type)
 }
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-15-1.png) 
 
 **Observation:**
 Weekend sees high activity level throughout the daywhile the weekday sees a peak at the beginning.
